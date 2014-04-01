@@ -1,0 +1,20 @@
+{
+  "manifest_version": 2,
+
+  "name": "Stack Notify",
+  "description": "Quickly be notified of SO questions",
+  "version": "1.0",
+
+  "permissions": [
+    "https://secure.flickr.com/",
+    "https://api.stackexchange.com/"
+  ],
+  "browser_action": {
+    "default_icon": "so-icon.png",
+    "default_popup": "popup.html"
+  },
+  "content_scripts" : [ {
+    "js": [ "jquery.min.js"],
+    "matches": ["http://*/*", "https://*/*"]
+  }]
+}
