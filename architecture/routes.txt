@@ -1,0 +1,21 @@
+
+POST /accounts - create a new account
+	param: String name
+	param: UUID google-id
+
+GET /accounts/{account-id} - get information on an account
+	return: {
+		id: UUID,
+		name: String,
+		google-id: UUID
+	}
+
+GET /accounts/{account-id}/tags - get all the tags the user is subscribed to
+	return: [
+		string
+	]
+
+POST /accounts/{account-id}/tags - subscribe to a new tag
+	param: String tag the tag to subscribe to
+
+DELETE /accounts/{account-id}/tags/{tag} - unsubscribe to a tag

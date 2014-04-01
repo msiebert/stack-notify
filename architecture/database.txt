@@ -1,0 +1,16 @@
+
+tables
+	
+	users
+		id uuid
+		name varchar
+		google_id uuid
+		oauth varchar
+
+	tags
+		id uuid
+		tag varchar
+
+	users_tags
+		user_id uuid
+		tag_id uuid
