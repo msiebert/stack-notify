@@ -3,7 +3,9 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.Application.index
+POST		/users											stack_notify.controllers.UserController.create
+GET			/users/:googleId						stack_notify.controllers.UserController.get(googleId: String)
+POST		/users/:googleId						stack_notify.controllers.UserController.updateAccessToken(googleId: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
