@@ -7,6 +7,7 @@ CREATE TABLE `users` (
 	`name` VARCHAR(50) NOT NULL,
 	`google_id` VARCHAR(200) NOT NULL,
 	`access_token` VARCHAR(200),
+	`so_id` BIGINT,
 	PRIMARY KEY (`id`),
 	KEY `google_id` (`google_id`)
 ) ENGINE=InnoDB CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -14,8 +15,7 @@ CREATE TABLE `users` (
 CREATE TABLE `tags` (
 	`id` BINARY(16) NOT NULL,
 	`tag` VARCHAR(100) NOT NULL,
-	PRIMARY KEY(`id`),
-	KEY `tag` (`tag`)
+	PRIMARY KEY(`tag`),
 ) ENGINE=InnoDB CHARSET=utf8 COLLATE=utf8_general_ci;
 
 CREATE TABLE `users_tags` (

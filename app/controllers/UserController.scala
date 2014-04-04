@@ -7,7 +7,7 @@ import play.api.data.Forms._
 import play.api.libs.json.Json
 import play.api.mvc._
 
-object UserController extends Controller {
+object UserController extends StackNotifyController {
 
 	private case class NewUser(
 		name: String,
@@ -37,18 +37,12 @@ object UserController extends Controller {
 	def create() = Action { implicit request =>
 		newUserForm.bindFromRequest().fold(
 			formWithErrors => {
-				Ok(Json.obj(
-					"success" -> false,
-					"message" -> "Invalid parameters"
-				))
+				failure("Invalid parameters")
 			},
 			data => {
 				val user = new User(data.name, data.googleId)
 				UserModel.create(user)
-				Ok(Json.obj(
-					"success" -> true,
-					"message" -> "Created new user."
-				))
+				success("message" -> "Created new user.")
 			}
 		)
 	}
@@ -60,22 +54,17 @@ object UserController extends Controller {
 	def get(googleId: String) = Action { implicit request =>
 		val user = UserModel.findByGoogleId(googleId)
 		if (user.isDefined) {
-			Ok(Json.obj(
-				"success" -> true,
+			success(
 				"user" -> Json.obj(
 					"id" -> user.get.id.toString,
 					"name" -> user.get.name,
 					"googleId" -> user.get.googleId,
 					"accessToken" -> user.get.accessToken
 				)
-			))
+			)
 		}
 		else {
-			Ok(Json.obj(
-				"success" -> false,
-				"user" -> "null",
-				"message" -> "User not found"
-			))
+			failure("User not found")
 		}
 	}
 
@@ -86,26 +75,17 @@ object UserController extends Controller {
 	def updateAccessToken(googleId: String) = Action { implicit request =>
 		accessTokenForm.bindFromRequest().fold(
 			formWithErrors => {
-				Ok(Json.obj(
-					"success" -> false,
-					"message" -> "Invalid parameters"
-				))
+				failure("Invalid parameters")
 			},
 			data => {
 				val user = UserModel.findByGoogleId(googleId)
 
 				if (user.isDefined) {
 					UserModel.update(user.get.copy(accessToken = Some(data.accessToken)))
-					Ok(Json.obj(
-						"success" -> true,
-						"message" -> "Updated access token."
-					))
+					success("message" -> "Updated access token.")
 				}
 				else {
-					Ok(Json.obj(
-						"success" -> false,
-						"message" -> "User not found."
-					))
+					failure("User not found.")
 				}
 			}
 		)
