@@ -3,9 +3,10 @@
 # ~~~~
 
 # users
-POST		/users											stack_notify.controllers.UserController.create
-GET			/users/:googleId						stack_notify.controllers.UserController.get(googleId: String)
-POST		/users/:googleId						stack_notify.controllers.UserController.updateAccessToken(googleId: String)
+POST		/users													stack_notify.controllers.UserController.create
+GET			/users/:googleId								stack_notify.controllers.UserController.get(googleId: String)
+POST		/users/:googleId/accessToken		stack_notify.controllers.UserController.updateAccessToken(googleId: String)
+POST		/users/:googleId/channelId			stack_notify.controllers.UserController.updateChannelId(googleId: String)
 
 # tags
 GET 		/users/:googleId/tags				stack_notify.controllers.TagController.tagsForUser(googleId: String)

@@ -14,8 +14,12 @@ object UserController extends StackNotifyController {
 		googleId: String
 	)
 
-	private case class GoogleIdAccessTokenPairing(
+	private case class AccessToken(
 		accessToken: String
+	)
+
+	private case class ChannelId(
+		channelId: String
 	)
 
 	private val newUserForm = Form(
@@ -28,7 +32,13 @@ object UserController extends StackNotifyController {
 	private val accessTokenForm = Form(
 		mapping(
 			"accessToken" -> text
-		)(GoogleIdAccessTokenPairing.apply)(GoogleIdAccessTokenPairing.unapply)
+		)(AccessToken.apply)(AccessToken.unapply)
+	)
+
+	private val channelIdForm = Form(
+		mapping(
+			"channelId" -> text
+		)(ChannelId.apply)(ChannelId.unapply)
 	)
 
 	/**
@@ -83,6 +93,29 @@ object UserController extends StackNotifyController {
 				if (user.isDefined) {
 					UserModel.update(user.get.copy(accessToken = Some(data.accessToken)))
 					success("message" -> "Updated access token.")
+				}
+				else {
+					failure("User not found.")
+				}
+			}
+		)
+	}
+
+	/**
+	 * Update a user's channel id
+	 * @param googleId the Google id of the user to update
+	 */
+	def updateChannelId(googleId: String) = Action { implicit request =>
+		channelIdForm.bindFromRequest().fold(
+			formWithErrors => {
+				failure("Invalid parameters")
+			},
+			data => {
+				val user = UserModel.findByGoogleId(googleId)
+
+				if (user.isDefined) {
+					UserModel.update(user.get.copy(channelId = Some(data.channelId)))
+					success("message" -> "Updated channel id.")
 				}
 				else {
 					failure("User not found.")

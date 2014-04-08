@@ -11,6 +11,7 @@ case class User (
 	id: UUID,
 	name: String,
 	googleId: String,
+	channelId: Option[String] = None,
 	accessToken: Option[String] = None
 ) {
 
@@ -29,9 +30,10 @@ object UserModel {
 		get[UUID]("id") ~
 		get[String]("name") ~
 		get[String]("google_id") ~
+		get[Option[String]]("channel_id") ~
 		get[Option[String]]("access_token") map {
-			case id ~ name ~ google_id ~ access_token =>
-				new User(id, name, google_id, access_token)
+			case id ~ name ~ google_id ~ channel_id ~ access_token =>
+				new User(id, name, google_id, channel_id, access_token)
 		}
 	}
 	
@@ -78,11 +80,12 @@ object UserModel {
 		DB.withConnection("default") { connection =>
 			SQL("""
 				UPDATE `users`
-				SET `name`={name}, `google_id`=`google_id`, `access_token`={access_token}
+				SET `name`={name}, `google_id`={google_id}, `channel_id`={channel_id}, `access_token`={access_token}
 				WHERE `id`={id}
 			""").on(
 				"name" -> user.name,
 				"google_id" -> user.googleId,
+				"channel_id" -> user.channelId,
 				"access_token" -> user.accessToken,
 				"id" -> user.id
 			).executeUpdate()(connection)
