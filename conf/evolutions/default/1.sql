@@ -6,8 +6,8 @@ CREATE TABLE `users` (
 	`id` BINARY(16) NOT NULL,
 	`name` VARCHAR(50) NOT NULL,
 	`google_id` VARCHAR(200) NOT NULL,
+	`channel_id` VARCHAR(200),
 	`access_token` VARCHAR(200),
-	`so_id` BIGINT,
 	PRIMARY KEY (`id`),
 	KEY `google_id` (`google_id`)
 ) ENGINE=InnoDB CHARSET=utf8 COLLATE=utf8_general_ci;

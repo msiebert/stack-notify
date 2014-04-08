@@ -7,7 +7,9 @@
 
   "permissions": [
     "https://secure.flickr.com/",
-    "https://api.stackexchange.com/"
+    "https://api.stackexchange.com/",
+    "pushMessaging",
+    "notifications"
   ],
   "browser_action": {
     "default_icon": "so-icon.png",
