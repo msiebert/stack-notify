@@ -15,7 +15,7 @@ CREATE TABLE `users` (
 CREATE TABLE `tags` (
 	`id` BINARY(16) NOT NULL,
 	`tag` VARCHAR(100) NOT NULL,
-	PRIMARY KEY(`tag`),
+	PRIMARY KEY(`tag`)
 ) ENGINE=InnoDB CHARSET=utf8 COLLATE=utf8_general_ci;
 
 CREATE TABLE `users_tags` (
