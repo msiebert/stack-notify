@@ -18,7 +18,20 @@
 
       #login-button {
         margin: 20px;
+        width: 200px;
+        display: block;
       }
+
+      .login {
+        margin: 20px;
+      }
+
+      .login input {
+        margin: 20px;
+        width: 200px;
+        display: block;
+      }
+
     </style>
     <link rel="stylesheet" type="text/css" href="bootstrap.css">
     <script src="jquery.min.js"></script>
@@ -26,7 +39,10 @@
   </head>
   <body>
     <div class="container">
-        <button class="btn btn-primary" id="login-button">Connect to Stack Overflow</button>
+        <div class="login">
+            <input id="login-name" type="text" placeholder="Enter your name">
+            <button class="btn btn-primary" id="login-button">Connect to Stack Overflow</button>
+        </div>
     </div>
   </body>
 </html>

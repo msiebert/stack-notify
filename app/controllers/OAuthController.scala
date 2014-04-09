@@ -8,11 +8,15 @@ import play.api.mvc._
 
 object OAuthController extends Controller {
 
+
+	val Host = "localhost:9000"
+	// val Host = 184.73.152.240
+
 	val StackExchange = "https://stackexchange.com/oauth"
 	val ClientSecret = "OByZgeorlcL4k7NfIfpVAA(("
 	val Key = "uzuwlVXnOAAwH*PM0goEPw(("
 	val ClientId = "2836"
-	val CallbackUrl = "localhost:9000/oauth/callback"
+	val CallbackUrl = Host + "/oauth/callback"
 
 	val PostRequest = "https://stackexchange.com/oauth/access_token"
 
