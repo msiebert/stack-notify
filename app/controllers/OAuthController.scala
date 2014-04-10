@@ -35,6 +35,8 @@ object OAuthController extends Controller {
 
 	def callback = Action { implicit request => 
 		Async {
+			println("request " + request)
+
 			val code = request.getQueryString("code").get
 
 			WS.url(PostRequest).post(getPostParams(code)).map { response =>
