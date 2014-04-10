@@ -9,8 +9,8 @@ import play.api.mvc._
 object OAuthController extends Controller {
 
 
-	val Host = "localhost:9000"
-	// val Host = 184.73.152.240
+	//val Host = "localhost:9000"
+	val Host = "184.73.152.240"
 
 	val StackExchange = "https://stackexchange.com/oauth"
 	val ClientSecret = "OByZgeorlcL4k7NfIfpVAA(("
