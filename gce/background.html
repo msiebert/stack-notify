@@ -1,0 +1,26 @@
+<html>
+  <head>
+    <script type="text/javascript" src="chrome_ex_oauthsimple.js"></script>
+    <script type="text/javascript" src="chrome_ex_oauth.js"></script>
+    <script type="text/javascript" src="onload.js"></script>
+    <script type="text/javascript">
+
+	    var HOST = '184.73.152.240';
+	    // var HOST = 'localhost:9000';
+
+	   
+
+      var oauth = ChromeExOAuth.initBackgroundPage({
+	      'request_url': SE.getRequestUrl(),
+	      'authorize_url': SE.getRequestUrl(),
+	      'access_url': SE.getRequestUrl(),
+	      'consumer_key': 'uzuwlVXnOAAwH*PM0goEPw((',
+	      'consumer_secret': 'OByZgeorlcL4k7NfIfpVAA((',
+	      'app_name': 'StackNotify'
+	  });
+
+    </script>
+  </head>
+  <body>
+  </body>
+</html>
