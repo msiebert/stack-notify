@@ -16,7 +16,7 @@ object OAuthController extends Controller {
 	val ClientSecret = "OByZgeorlcL4k7NfIfpVAA(("
 	val Key = "uzuwlVXnOAAwH*PM0goEPw(("
 	val ClientId = "2836"
-	val CallbackUrl = Host + "/oauth/callback"
+	val CallbackUrl = "http://" + Host + "/oauth/callback"
 
 	val PostRequest = "https://stackexchange.com/oauth/access_token"
 
@@ -40,6 +40,7 @@ object OAuthController extends Controller {
 			val code = request.getQueryString("code").get
 
 			WS.url(PostRequest).post(getPostParams(code)).map { response =>
+				println("response.body " + response.body)
 				Ok(response.body)
 			}
 		}
