@@ -1,99 +1,163 @@
 
+/**
+ * Contains all network data
+ * @type {Object}
+ */
+var Net = {
+	/**
+	 * @type {String}
+	 */
+	HOST : '184.73.152.240',
 
-// var HOST = '184.73.152.240';
-var HOST = 'localhost:9000';
+	/**
+	 * @type {String}
+	 */
+	PROTOCAL : 'http://'
+}
 
-var SE = {
+/**
+ * Contains operations for oauth with Stack Exchange
+ * @type {Object}
+ */
+var StackExchange = {
 
-  redirect_uri : 'http://' + HOST + '/oauth/callback',
+  /**
+   * OAuth callback url
+   * @type {String}
+   */
+  CALLBACK_URL : Net.PROTOCAL + Net.HOST + '/oauth/callback',
 
-  client_id : '2836',
+  /**
+   * client id provided by StackApp
+   * @type {string}
+   */
+  CLIENT_ID : '2836',
 
-  url : 'https://stackexchange.com/oauth',
+  /**
+   * Stack Exchange auth url
+   * @type {string}
+   */
+  OAUTH_URL : 'https://stackexchange.com/oauth', 
 
-  connect : function() {
-    window.location.href = SE.url + '?client_id=' + SE.client_id + '&redirect_uri=' + SE.redirect_uri;
+  /**
+   * Returns the oauth request url
+   * @return {string} [description]
+   */
+  getOauthRequestUrl : function() {
+    return this.OAUTH_URL + 
+    	'?client_id=' + this.CLIENT_ID + 
+    	'&scope=private_info' +
+    	'&redirect_uri=' + this.CALLBACK_URL;
+  },
+
+  /**
+   * Performs authentication
+   * @return {void} [description]
+   */
+  authenticate : function() {
+  	chrome.identity.launchWebAuthFlow({
+		'url': this.getOauthRequestUrl(),
+		'interactive' : true
+	}, function(redirect_url) {});
   }
 }
 
-function StackNotify(extensionId) {
-	console.log('extensionid : ' + extensionId);
+/**
+ * Contains operations for StackNotify operations
+ * @type {Object}
+ */
+var StackNotify = {
 
-	this.googleId = extensionId;
+	/**
+	 * extension identification 
+	 * @type {string}
+	 */
+	googleId : chrome.runtime.id,
+
+	/**
+	 * Registers the user's name and googleId
+	 * @param  {string} name
+	 * @return {void}
+	 */
+	register : function(name) {
+		var me = this;
+
+		$.ajax({
+			url : Net.PROTOCAL + Net.HOST + '/users' ,
+			type : 'POST',
+			data : {
+				googleId : me.googleId,
+				name: name
+			},
+			success : function(xhr) {
+				console.log("register.success");
+			},
+			error : function(xhr) {
+				console.log("register.error");
+				console.dir(xhr);
+			}
+		});
+	},
+
+	/**
+	 * Sets the channel id of StackNotify object and posts to server
+	 * @param {string} id
+	 */
+	setChannelId : function(id) {
+		console.log('channel id : ' + id);
+		var me = this;
+
+		$.ajax({
+			url : Net.PROTOCAL + Net.HOST + '/users/' + me.googleId + '/channelId',
+			type : 'POST',
+			data : {
+				channelId : me.channelId = id.channelId,
+			},
+			success : function(xhr) {
+				console.log("setChannelId.success");
+				console.dir(xhr);
+			},
+			error : function(xhr) {
+				console.log("setChannelId.error");
+				console.dir(xhr);
+			}
+		});
+	},
+
+	/**
+	 * GCM callback
+	 * @param  {Object} payload - object format {'title' : ..., 'link' : ....}
+	 * @return {void}
+	 */
+	messageCallback : function(payload) {
+		console.log('messageCallback.start');
+		// TODO write payload to the view
+
+		console.log('messageCallback.end');
+	},
+
+	/**
+	 * Initializes GCM
+	 * @return {[type]} [description]
+	 */
+	initGCM : function() {
+		chrome.pushMessaging.onMessage.addListener(this.messageCallback);
+	}
+
 }
 
-StackNotify.prototype.register = function(name) {
-	var me = this;
-
-	$.ajax({
-		url : 'http://' + HOST + '/users' ,
-		type : 'POST',
-		data : {
-			googleId : me.googleId,
-			name: name
-		},
-		success : function(xhr) {
-			console.log("register.success");
-		},
-		error : function(xhr) {
-			console.log("register.error");
-			console.dir(xhr);
-		}
-	});
-}
-
-StackNotify.prototype.setChannelId = function(id) {
-	var me = this;
-
-	$.ajax({
-		url : 'http://' + HOST + '/users/' + me.googleId + '/channelId',
-		type : 'POST',
-		data : {
-			channelId : me.channelId = id.channelId,
-		},
-		success : function(xhr) {
-			console.log("setChannelId.success");
-		},
-		error : function(xhr) {
-			console.log("setChannelId.error");
-			console.dir(xhr);
-		}
-	});
-}
-
-StackNotify.prototype.messageCallback = function(x) {
-	console.log('messageCallback.start');
-
-	console.dir(x);
-	// TODO write questions to the viewq
-
-	console.log('messageCallback.end');
-}
-
-StackNotify.prototype.setupMessaging = function() {
-	chrome.pushMessaging.onMessage.addListener(this.messageCallback);
-}
 
 $(function () {
-  console.log("loaded.start");
-
-  var stackNotify = new StackNotify(chrome.i18n.getMessage("@@extension_id"));
   
+  // TODO alter the view based on if this user has an access_token
+
   $('#login-button').click(function() {
-    console.log("login-button.start");
-
     var name = $('#login-name').val();
-    console.log('name : ' + name);
-    stackNotify.register(name);
 
-    chrome.pushMessaging.getChannelId(false, stackNotify.setChannelId);
-    console.log('channelId : ' + stackNotify.channelId);
+    StackNotify.register(name);
+    chrome.pushMessaging.getChannelId(false, StackNotify.setChannelId);
 
-    
-    SE.connect();
-
-    console.log("login-button.end");
+    StackExchange.authenticate();
   });
 
-  console.log("loaded.end");
 });

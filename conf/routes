@@ -3,18 +3,18 @@
 # ~~~~
 
 # users
-POST		/users													stack_notify.controllers.UserController.create
-GET			/users/:googleId								stack_notify.controllers.UserController.get(googleId: String)
+POST		/users								stack_notify.controllers.UserController.create
+GET			/users/:googleId					stack_notify.controllers.UserController.get(googleId: String)
 POST		/users/:googleId/accessToken		stack_notify.controllers.UserController.updateAccessToken(googleId: String)
 POST		/users/:googleId/channelId			stack_notify.controllers.UserController.updateChannelId(googleId: String)
 GET 		/users/:googleId/authenticated 	stack_notify.controllers.UserController.checkAuthentication(googleId: String)
 
 # tags
 GET 		/users/:googleId/tags				stack_notify.controllers.TagController.tagsForUser(googleId: String)
-POST 		/users/:googleId/tags/update 	stack_notify.controllers.TagController.updateTags(googleId: String)
+POST 		/users/:googleId/tags/update 		stack_notify.controllers.TagController.updateTags(googleId: String)
 
 # oauth
-GET 		/oauth/callback							stack_notify.controllers.OAuthController.callback
+GET 		/oauth/callback						stack_notify.controllers.OAuthController.callback
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
+GET     /assets/*file               			controllers.Assets.at(path="/public", file)
