@@ -79,6 +79,26 @@ object UserController extends StackNotifyController {
 	}
 
 	/**
+	 * Check to see if a user is authenticated
+	 * @param googleId the Google id of the user to check
+	 */
+	def checkAuthentication(googleId: String) = Action { implicit request =>
+		val user = UserModel.findByGoogleId(googleId)
+
+		if (user.isDefined) {
+			if (user.get.accessToken.isDefined) {
+				success("authenticated" -> true)
+			}
+			else {
+				success("authenticated" -> false)
+			}
+		}
+		else {
+			failure("User not found")
+		}
+	}
+
+	/**
 	 * Update a user's access token
 	 * @param googleId the Google id of the user to update
 	 */
