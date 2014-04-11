@@ -63,10 +63,10 @@ var StackExchange = {
 }
 
 /**
- * Contains operations for StackNotify operations
+ * Client interface for StackNotify server
  * @type {Object}
  */
-var StackNotify = {
+var StackNotifyClient = {
 
 	/**
 	 * extension identification 
@@ -100,7 +100,7 @@ var StackNotify = {
 	},
 
 	/**
-	 * Sets the channel id of StackNotify object and posts to server
+	 * Sets the channel id of StackNotifyClient object and posts to server
 	 * @param {string} id
 	 */
 	setChannelId : function(id) {
@@ -131,9 +131,7 @@ var StackNotify = {
 	 */
 	messageCallback : function(payload) {
 		console.log('messageCallback.start');
-		// TODO write payload to the view
-
-		console.log('messageCallback.end');
+		UI.appendQuestion(payload);
 	},
 
 	/**
@@ -142,22 +140,148 @@ var StackNotify = {
 	 */
 	initGCM : function() {
 		chrome.pushMessaging.onMessage.addListener(this.messageCallback);
-	}
+	},
 
+	/**
+	 * Checks the registration status of the user
+	 * @return {[type]} [description]
+	 */
+	checkUserAuthStatus : function() {
+		$.ajax({
+			url : Net.PROTOCAL + Net.HOST + '/users/' + this.googleId + '/authenticated' ,
+			type : 'GET',
+			success : function(xhr) {
+				console.log("checkUserAuthStatus.success");
+
+				UI.loading().hide();
+
+				if (xhr.authenticated) {
+					UI.setQuestionState();
+				} else {
+					UI.setLoginState();
+				}
+			},
+			error : function(xhr) {
+				console.log("checkUserAuthStatus.error");
+
+				UI.loading().hide();
+				UI.setErrorState();
+			}
+		});
+	}
+}
+
+/**
+ * Contains all methods and data for User Interface
+ * @type {Object}
+ */
+var UI = {
+
+	/**
+	 * Closure for container div
+	 * @return {jQuery}
+	 *
+	 * @private
+	 */
+	container : function() {
+		return $('.container');
+	},
+
+	/**
+	 * Closure for Loading img
+	 * @type {jQuery}
+	 *
+	 * @private
+	 */
+	loading: function() {
+		return $('#loading');
+	},
+
+	/**
+	 * Reprsents current state of UI
+	 * @type {String}
+	 *
+	 * @private
+	 */
+	state : 'login',
+
+	/**
+	 * Changes the state to the given state
+	 * @param  {string} state
+	 * @return {void}
+	 *
+	 * @private
+	 */
+	changeState : function(state) {
+		console.log('UI state change to ' + state);
+		this.state = state;
+		this.container().empty();
+	},
+
+	/**
+	 * Sets UI state to Error
+	 */
+	setErrorState : function() {
+		this.changeState('error');
+		this.container().append('<h1 style="color: red;">Epic Fail!</h1>')
+	},
+
+	/**
+	 * Sets UI state to Login
+	 */
+	setLoginState : function() {
+		this.changeState('login');
+		this.container().append('' + 
+			'<div class="login">' +
+            	'<input id="login-name" type="text" placeholder="Enter your name">' +
+            	'<button class="btn btn-primary" id="login-button">Connect to Stack Overflow</button>' +
+        	'</div>'
+        );
+
+		$('#login-button').click(function() {
+		  var name = $('#login-name').val();
+
+		  StackNotifyClient.register(name);
+		  chrome.pushMessaging.getChannelId(false, StackNotifyClient.setChannelId);
+
+		  StackExchange.authenticate();
+		});
+	},
+
+	/**
+	 * Sets UI state to Questions
+	 */
+	setQuestionState : function() {
+		this.changeState('questions');
+		this.container().append('' + 
+			'<div class="qs">' +
+            	'<ul id="qs-list">' + 
+            	'</ul>' +
+        	'</div>'
+        );
+	},
+
+	/**
+	 * Appends a question to the current list
+	 * @param  {Object<String,String>} question Object of the form {'title' : ..., 'link' : ...}
+	 * @return {void}
+	 */
+	appendQuestion : function(question) {
+		if (this.state != 'questions') {
+			console.error('wrong state! Current state is ' + this.state);
+			return;
+		}
+
+		$('#qsk-list').append('<li><span><a href="' + question.link + '">' + question.title + '</a>');
+	}
 }
 
 
+/**
+ * On Page load
+ */
 $(function () {
-  
-  // TODO alter the view based on if this user has an access_token
-
-  $('#login-button').click(function() {
-    var name = $('#login-name').val();
-
-    StackNotify.register(name);
-    chrome.pushMessaging.getChannelId(false, StackNotify.setChannelId);
-
-    StackExchange.authenticate();
-  });
-
+	setTimeout(function() {
+		StackNotifyClient.checkUserAuthStatus();
+	}, 1000);
 });
