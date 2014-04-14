@@ -8,6 +8,7 @@ var Net = {
 	 * @type {String}
 	 */
 	HOST : '184.73.152.240',
+	//HOST: 'localhost:9000',
 
 	/**
 	 * @type {String}
@@ -25,7 +26,9 @@ var StackExchange = {
    * OAuth callback url
    * @type {String}
    */
-  CALLBACK_URL : Net.PROTOCAL + Net.HOST + '/oauth/callback',
+  getCallbackUrl : function(id) {
+  	return Net.PROTOCAL + Net.HOST + '/oauth/' + id + '/callback';
+  },
 
   /**
    * client id provided by StackApp
@@ -43,20 +46,20 @@ var StackExchange = {
    * Returns the oauth request url
    * @return {string} [description]
    */
-  getOauthRequestUrl : function() {
+  getOauthRequestUrl : function(id) {
     return this.OAUTH_URL + 
     	'?client_id=' + this.CLIENT_ID + 
     	'&scope=private_info' +
-    	'&redirect_uri=' + this.CALLBACK_URL;
+    	'&redirect_uri=' + this.getCallbackUrl(id);
   },
 
   /**
    * Performs authentication
    * @return {void} [description]
    */
-  authenticate : function() {
+  authenticate : function(id) {
   	chrome.identity.launchWebAuthFlow({
-		'url': this.getOauthRequestUrl(),
+		'url': this.getOauthRequestUrl(id),
 		'interactive' : true
 	}, function(redirect_url) {});
   }
@@ -79,50 +82,34 @@ var StackNotifyClient = {
 	 * @param  {string} name
 	 * @return {void}
 	 */
-	register : function(name) {
+	register : function(name, channelId) {
+		console.log('channel id : ');
+		console.dir(channelId);
 		var me = this;
+
+		me.channelId = channelId.channelId
+		me.googleId = me.channelId;
 
 		$.ajax({
 			url : Net.PROTOCAL + Net.HOST + '/users' ,
 			type : 'POST',
 			data : {
-				googleId : me.googleId,
-				name: name
+				googleId : me.channelId,
+				name: name,
+				channelId : me.channelId,
 			},
 			success : function(xhr) {
 				console.log("register.success");
+				console.dir(xhr);
 			},
 			error : function(xhr) {
 				console.log("register.error");
 				console.dir(xhr);
+				UI.setErrorState();
 			}
 		});
 	},
 
-	/**
-	 * Sets the channel id of StackNotifyClient object and posts to server
-	 * @param {string} id
-	 */
-	setChannelId : function(id) {
-		console.log('channel id : ' + id);
-		var me = this;
-
-		$.ajax({
-			url : Net.PROTOCAL + Net.HOST + '/users/' + me.googleId + '/channelId',
-			type : 'POST',
-			data : {
-				channelId : me.channelId = id.channelId,
-			},
-			success : function(xhr) {
-				console.log("setChannelId.success");
-				console.dir(xhr);
-			},
-			error : function(xhr) {
-				console.log("setChannelId.error");
-				console.dir(xhr);
-			}
-		});
-	},
 
 	/**
 	 * GCM callback
@@ -151,11 +138,12 @@ var StackNotifyClient = {
 			url : Net.PROTOCAL + Net.HOST + '/users/' + this.googleId + '/authenticated' ,
 			type : 'GET',
 			success : function(xhr) {
-				console.log("checkUserAuthStatus.success");
+				console.dir(xhr);
+				console.log("checkUserAuthStatus.success - authenticated - " + xhr.result.authenticated);
 
 				UI.loading().hide();
 
-				if (xhr.authenticated) {
+				if (xhr.result.authenticated || true) {
 					UI.setQuestionState();
 				} else {
 					UI.setLoginState();
@@ -240,11 +228,13 @@ var UI = {
 
 		$('#login-button').click(function() {
 		  var name = $('#login-name').val();
+		 
+		  chrome.pushMessaging.getChannelId(false, function(id) {
+		  	 StackNotifyClient.register(name, id);
+		  });
 
-		  StackNotifyClient.register(name);
-		  chrome.pushMessaging.getChannelId(false, StackNotifyClient.setChannelId);
-
-		  StackExchange.authenticate();
+		  console.log('finished registration');
+		  StackExchange.authenticate(StackNotifyClient.googleId);
 		});
 	},
 
@@ -254,6 +244,7 @@ var UI = {
 	setQuestionState : function() {
 		this.changeState('questions');
 		this.container().append('' + 
+			'<h2>SO Questions</h2>' +
 			'<div class="qs">' +
             	'<ul id="qs-list">' + 
             	'</ul>' +
@@ -272,7 +263,7 @@ var UI = {
 			return;
 		}
 
-		$('#qsk-list').append('<li><span><a href="' + question.link + '">' + question.title + '</a>');
+		$('#qs-list').append('<li><span><a href="' + question.link + '">' + question.title + '</a>');
 	}
 }
 

@@ -11,7 +11,8 @@ object UserController extends StackNotifyController {
 
 	private case class NewUser(
 		name: String,
-		googleId: String
+		googleId: String,
+		channelId: String
 	)
 
 	private case class AccessToken(
@@ -25,7 +26,8 @@ object UserController extends StackNotifyController {
 	private val newUserForm = Form(
 		mapping(
 			"name" -> text,
-			"googleId" -> text
+			"googleId" -> text,
+			"channelId" -> text
 		)(NewUser.apply)(NewUser.unapply)
 	)
 
@@ -52,6 +54,7 @@ object UserController extends StackNotifyController {
 			data => {
 				val user = new User(data.name, data.googleId)
 				UserModel.create(user)
+				UserModel.update(user.copy(channelId = Some(data.channelId)))
 				success("message" -> "Created new user.")
 			}
 		)
