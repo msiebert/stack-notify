@@ -34,14 +34,10 @@ object OAuthController extends StackNotifyController {
 		)
 	}
 
-	def callback = Action { implicit request => 
+	def callback(googleId: String) = Action { implicit request => 
 		Async {
 			
 			val code = request.getQueryString("code").get
-			val idRegex = ".*/oauth/(.+)/.*".r
-			val googleId = request.path match {
-				case idRegex(group) => group
-			}
 			WS.url(PostRequest).post(getPostParams(code, googleId)).map { response =>
 				val regex = "access_token=(.+)&.*".r
 				val access = response.body match {
