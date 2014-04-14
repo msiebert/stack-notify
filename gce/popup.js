@@ -139,11 +139,10 @@ var StackNotifyClient = {
 			type : 'GET',
 			success : function(xhr) {
 				console.dir(xhr);
-				console.log("checkUserAuthStatus.success - authenticated - " + xhr.result.authenticated);
 
 				UI.loading().hide();
 
-				if (xhr.result.authenticated || true) {
+				if (xhr.result && xhr.result.authenticated) {
 					UI.setQuestionState();
 				} else {
 					UI.setLoginState();
