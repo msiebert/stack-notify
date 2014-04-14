@@ -5,6 +5,7 @@ import play.api.data._
 import play.api.data.Forms._
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.Json
+import play.api.libs.json._
 import play.api.libs.ws.WS
 import play.api.mvc._
 import stack_notify.models.{Tag, TagModel, UserModel}
@@ -59,8 +60,14 @@ object TagController extends StackNotifyController {
 				).get().map { response =>
 					response.status match {
 						case 200 => {
-							println(response.json)
-							Ok(response.json)
+							val tags = (response.json \ "items").as[JsArray].value.map { tag =>
+								(tag \ "name").as[String]
+							}.toList
+
+							val tagIds = TagModel.tagIds(tags)
+							TagModel.createTagsForUser(user.get.id, tagIds)
+
+							success("message" -> "Tags updated.")
 						}
 						case _ => {
 							println(new String(response.body.getBytes, "US-ASCII"))
@@ -69,12 +76,6 @@ object TagController extends StackNotifyController {
 					}
 				}
 			}
-
-
-			// val tagIds = TagModel.tagIds(tags)
-			// TagModel.createTagsForUser(user.get.id, tagIds)
-
-			// success("message" -> "Tags updated.")
 		}
 		else if (user.isDefined && !user.get.accessToken.isDefined) {
 			failure("User has no access token.")
