@@ -58,6 +58,7 @@ var StackExchange = {
    * @return {void} [description]
    */
   authenticate : function(id) {
+  	console.log(this.getOauthRequestUrl(id));
   	chrome.identity.launchWebAuthFlow({
 		'url': this.getOauthRequestUrl(id),
 		'interactive' : true
@@ -101,6 +102,7 @@ var StackNotifyClient = {
 			success : function(xhr) {
 				console.log("register.success");
 				console.dir(xhr);
+				StackExchange.authenticate(StackNotifyClient.googleId);
 			},
 			error : function(xhr) {
 				console.log("register.error");
@@ -233,7 +235,6 @@ var UI = {
 		  });
 
 		  console.log('finished registration');
-		  StackExchange.authenticate(StackNotifyClient.googleId);
 		});
 	},
 
