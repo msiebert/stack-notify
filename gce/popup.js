@@ -58,11 +58,15 @@ var StackExchange = {
    * @return {void} [description]
    */
   authenticate : function(id) {
+  	console.log('id ' + id);
   	console.log(this.getOauthRequestUrl(id));
   	chrome.identity.launchWebAuthFlow({
 		'url': this.getOauthRequestUrl(id),
 		'interactive' : true
-	}, function(redirect_url) {});
+	}, function(redirect_url) {
+		console.log("redirect_uri");
+		StackNotifyClient.updateTags();
+	});
   }
 }
 
@@ -89,13 +93,13 @@ var StackNotifyClient = {
 		var me = this;
 
 		me.channelId = channelId.channelId
-		me.googleId = me.channelId;
+		me.googleId = me.channelId.split('/')[0];
 
 		$.ajax({
 			url : Net.PROTOCAL + Net.HOST + '/users' ,
 			type : 'POST',
 			data : {
-				googleId : me.channelId,
+				googleId : me.googleId,
 				name: name,
 				channelId : me.channelId,
 			},
@@ -112,6 +116,26 @@ var StackNotifyClient = {
 		});
 	},
 
+	/**
+	 * Asks the server to update the user's tags
+	 * @return {void}
+	 */
+	updateTags : function() {
+		$.ajax({
+			url : Net.PROTOCAL + Net.HOST + '/users/' + this.googleId + '/tags/update',
+			type : 'POST',
+			data : {},
+			success : function(xhr) {
+				console.log("updateTags.success");
+				console.dir(xhr);
+			},
+			error : function(xhr) {
+				console.log("updateTags.error");
+				console.dir(xhr);
+				UI.setErrorState();
+			}
+		});
+	},
 
 	/**
 	 * GCM callback
@@ -128,6 +152,7 @@ var StackNotifyClient = {
 	 * @return {[type]} [description]
 	 */
 	initGCM : function() {
+		console.log('initGCM.start');
 		chrome.pushMessaging.onMessage.addListener(this.messageCallback);
 	},
 
@@ -144,7 +169,8 @@ var StackNotifyClient = {
 
 				UI.loading().hide();
 
-				if (xhr.result && xhr.result.authenticated) {
+				if ((xhr.result && xhr.result.authenticated) || true) {
+					StackNotifyClient.updateTags();
 					UI.setQuestionState();
 				} else {
 					UI.setLoginState();
@@ -274,5 +300,6 @@ var UI = {
 $(function () {
 	setTimeout(function() {
 		StackNotifyClient.checkUserAuthStatus();
+		StackNotifyClient.initGCM();
 	}, 1000);
 });
