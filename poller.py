@@ -1,6 +1,7 @@
 import binascii
 import calendar
 import datetime
+import json
 import MySQLdb
 import requests
 from uuid import UUID
@@ -91,9 +92,10 @@ class Poller:
 
 			param: Tag tag the tag to process
 		'''
+		print tag.tag
 		#get the new questions for the tag
 		#/2.2/questions?order=desc&min=1396828800&sort=activity&tagged=scala&site=stackoverflow
-		time = datetime.datetime.now() - datetime.timedelta(minutes=3)
+		time = datetime.datetime.now() - datetime.timedelta(minutes=10)
 		time = calendar.timegm(time.timetuple())
 		params = {
 			'order': 'desc',
@@ -120,10 +122,21 @@ class Poller:
 				params = {
 					'channelId': user.channel_id,
 					'subchannelId': '0',
-					'payload': '{title: "' + question.title + '", link: "' + question.link + '"}'
+					'payload': {
+						'title': question.title, 
+						'link': question.link
+					}
 				}
+
+				headers = {'Authorization' : 'Bearer ' + access_token,
+						'Content-Type': 'application/json'}
+				print user.name
+				#print headers
+				print json.dumps(params)
+				print "\n"
 				
-				requests.post('https://www.googleapis.com/gcm_for_chrome/v1/messages', data=params)
+				something = requests.post('https://www.googleapis.com/gcm_for_chrome/v1/messages', data=json.dumps(params), headers=headers)
+				print something.text
 
 	def get_access_token(self):
 		time_format = '%d %b %Y %H:%M:%S'

@@ -20,7 +20,7 @@ object TagController extends StackNotifyController {
 	private def updateTagUrl = "https://api.stackexchange.com/2.2/me/tags"
 	private def updateTagParams(accessToken: String) = Map(
 		"order" -> "desc",
-		"sort" ->	"popular",
+		"sort" -> "popular",
 		"site" -> "stackoverflow",
 		"key" -> key,
 		"access_token" -> accessToken
@@ -55,7 +55,7 @@ object TagController extends StackNotifyController {
 		
 		if (user.isDefined && user.get.accessToken.isDefined) {
 			TagModel.deleteTagsForUser(user.get.id)
-			val tags = List("scala", "openid")
+			//val tags = List("scala", "openid")
 			//get the tags from SO
 			val result = get(updateTagUrl + "?" + updateTagParams(user.get.accessToken.get).map { case (name, value) =>
 				name + "=" + value
@@ -63,7 +63,7 @@ object TagController extends StackNotifyController {
 
 			val json = Json.parse(result)			
 
-			val tags = (response.json \ "items").as[JsArray].value.map { tag =>
+			val tags = (json \ "items").as[JsArray].value.map { tag =>
 				(tag \ "name").as[String]
 			}.toList
 
