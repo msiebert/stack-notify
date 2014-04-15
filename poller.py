@@ -62,9 +62,9 @@ class Poller:
 		Poll Stack Overflow's API to check for new questions concerning topics the users have subscribed to
 		'''
 		tags = self.get_tags()
-		# for tag in tags:
-		# 	self.process_tag(tag)
-		self.process_tag(tags[10])
+		for tag in tags:
+		 	self.process_tag(tag)
+	#	self.process_tag(tags[1])
 
 	def get_tags(self):
 		'''
@@ -123,10 +123,10 @@ class Poller:
 				params = {
 					'channelId': user.channel_id,
 					'subchannelId': '0',
-					'payload': {
-						'title': question.title, 
-						'link': question.link
-					}
+					'payload': question.title + "," + question.link# {
+						#'title': question.title, 
+						#'link': question.link
+				#	}
 				}
 
 				headers = {'Authorization' : 'Bearer ' + access_token,
