@@ -80,7 +80,7 @@ var StackNotifyClient = {
 	 * extension identification 
 	 * @type {string}
 	 */
-	googleId : chrome.runtime.id,
+	googleId : '1',
 
 	/**
 	 * Registers the user's name and googleId
@@ -106,7 +106,7 @@ var StackNotifyClient = {
 			success : function(xhr) {
 				console.log("register.success");
 				console.dir(xhr);
-				StackExchange.authenticate(StackNotifyClient.googleId);
+				StackNotifyClient.authenticate(me.googleId);
 			},
 			error : function(xhr) {
 				console.log("register.error");
@@ -120,9 +120,11 @@ var StackNotifyClient = {
 	 * Asks the server to update the user's tags
 	 * @return {void}
 	 */
-	updateTags : function() {
+	updateTags : function(id) {
+		console.log('updateTags.start');
+		console.log('googleId ' + this.googleId);
 		$.ajax({
-			url : Net.PROTOCAL + Net.HOST + '/users/' + this.googleId + '/tags/update',
+			url : Net.PROTOCAL + Net.HOST + '/users/' + id + '/tags/update',
 			type : 'POST',
 			data : {},
 			success : function(xhr) {
@@ -161,28 +163,39 @@ var StackNotifyClient = {
 	 * @return {[type]} [description]
 	 */
 	checkUserAuthStatus : function() {
-		$.ajax({
-			url : Net.PROTOCAL + Net.HOST + '/users/' + this.googleId + '/authenticated' ,
-			type : 'GET',
-			success : function(xhr) {
-				console.dir(xhr);
+		chrome.pushMessaging.getChannelId(false, function(channelId) {
+		  	console.log('channel id : ');
+			console.dir(channelId);
+			var me = this;
 
-				UI.loading().hide();
+			me.channelId = channelId.channelId
+			me.googleId = me.channelId.split('/')[0];
 
-				if ((xhr.result && xhr.result.authenticated) || true) {
-					StackNotifyClient.updateTags();
-					UI.setQuestionState();
-				} else {
-					UI.setLoginState();
+			$.ajax({
+				url : Net.PROTOCAL + Net.HOST + '/users/' + me.googleId + '/authenticated' ,
+				type : 'GET',
+				success : function(xhr) {
+					console.dir(xhr);
+					console.log('googleId ' + me.googleId);
+
+					UI.loading().hide();
+
+					if (xhr.result && xhr.result.authenticated) {
+						StackNotifyClient.updateTags(me.googleId);
+						UI.setQuestionState();
+					} else {
+						UI.setLoginState();
+					}
+				},
+				error : function(xhr) {
+					console.log("checkUserAuthStatus.error");
+
+					UI.loading().hide();
+					UI.setErrorState();
 				}
-			},
-			error : function(xhr) {
-				console.log("checkUserAuthStatus.error");
-
-				UI.loading().hide();
-				UI.setErrorState();
-			}
+			});
 		});
+		
 	}
 }
 

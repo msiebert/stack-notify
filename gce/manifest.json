@@ -3,7 +3,7 @@
 
   "name": "Stack Notify",
   "description": "Quickly be notified of SO questions",
-  "version": "1.0",
+  "version": "1.2",
 
   "permissions": [
     "tabs",
