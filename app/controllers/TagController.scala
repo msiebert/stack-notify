@@ -60,32 +60,17 @@ object TagController extends StackNotifyController {
 			val result = get(updateTagUrl + "?" + updateTagParams(user.get.accessToken.get).map { case (name, value) =>
 				name + "=" + value
 			}.mkString("&"))
-			println(result)		
-	
-			Async {
-				WS.url(updateTagUrl).withQueryString(
-					updateTagParams(user.get.accessToken.get):_*
-				).withHeaders(
-					"Accept" -> "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
-				).get().map { response =>
-					response.status match {
-						case 200 => {
-							println(response.getAHCResponse.getResponseBody("UTF-8"))
-							val tags = (response.json \ "items").as[JsArray].value.map { tag =>
-								(tag \ "name").as[String]
-							}.toList
 
-							val tagIds = TagModel.tagIds(tags)
-							TagModel.createTagsForUser(user.get.id, tagIds)
+			val json = Json.parse(result)			
 
-							success("message" -> "Tags updated.")
-						}
-						case _ => {
-							failure("Error accessing SO. Error code: " + response.status)
-						}
-					}
-				}
-			}
+			val tags = (response.json \ "items").as[JsArray].value.map { tag =>
+				(tag \ "name").as[String]
+			}.toList
+
+			val tagIds = TagModel.tagIds(tags)
+			TagModel.createTagsForUser(user.get.id, tagIds)
+
+			success("message" -> "Tags updated.")
 		}
 		else if (user.isDefined && !user.get.accessToken.isDefined) {
 			failure("User has no access token.")
