@@ -2,6 +2,7 @@ package stack_notify.controllers
 
 import java.io._
 import java.net._
+import java.util.zip.GZIPInputStream
 import play.api._
 import play.api.data._
 import play.api.data.Forms._
@@ -22,7 +23,7 @@ object TagController extends StackNotifyController {
 		"sort" ->	"popular",
 		"site" -> "stackoverflow",
 		"key" -> key,
-		"accessToken" -> accessToken
+		"access_token" -> accessToken
 	).toSeq
 
 	/**
@@ -59,13 +60,17 @@ object TagController extends StackNotifyController {
 			val result = get(updateTagUrl + "?" + updateTagParams(user.get.accessToken.get).map { case (name, value) =>
 				name + "=" + value
 			}.mkString("&"))
-			println(result)
+			println(result)		
+	
 			Async {
 				WS.url(updateTagUrl).withQueryString(
 					updateTagParams(user.get.accessToken.get):_*
+				).withHeaders(
+					"Accept" -> "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
 				).get().map { response =>
 					response.status match {
 						case 200 => {
+							println(response.getAHCResponse.getResponseBody("UTF-8"))
 							val tags = (response.json \ "items").as[JsArray].value.map { tag =>
 								(tag \ "name").as[String]
 							}.toList
@@ -99,14 +104,14 @@ object TagController extends StackNotifyController {
 		val url = new URL(urlToRead)
 		val conn = url.openConnection().asInstanceOf[HttpURLConnection]
 		conn.setRequestMethod("GET")
-		val rd = new BufferedReader(new InputStreamReader(conn.getInputStream()))
+		val rd = new BufferedReader(new InputStreamReader(new GZIPInputStream(conn.getInputStream())))
 		var line = rd.readLine()
 		while (line != null) {
 			 result += line
 			 line = rd.readLine()
 		}
 		rd.close()
-		result
+		new String(result.getBytes, "UTF-8")
 	}
 
 }
