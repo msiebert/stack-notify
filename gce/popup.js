@@ -106,7 +106,7 @@ var StackNotifyClient = {
 			success : function(xhr) {
 				console.log("register.success");
 				console.dir(xhr);
-				StackNotifyClient.authenticate(me.googleId);
+				StackExchange.authenticate(me.googleId);
 			},
 			error : function(xhr) {
 				console.log("register.error");
@@ -146,6 +146,7 @@ var StackNotifyClient = {
 	 */
 	messageCallback : function(payload) {
 		console.log('messageCallback.start');
+		console.dir(payload);
 		UI.appendQuestion(payload);
 	},
 
@@ -301,8 +302,10 @@ var UI = {
 			console.error('wrong state! Current state is ' + this.state);
 			return;
 		}
+		var payload = question.payload.split(',');
+		console.log(payload);
 
-		$('#qs-list').append('<li><span><a href="' + question.link + '">' + question.title + '</a>');
+		$('#qs-list').append('<li><span><a href="' + payload[1] + '" target="_newtab">' + payload[0] + '</a>');
 	}
 }
 

@@ -64,7 +64,6 @@ class Poller:
 		tags = self.get_tags()
 		for tag in tags:
 		 	self.process_tag(tag)
-	#	self.process_tag(tags[1])
 
 	def get_tags(self):
 		'''
@@ -132,7 +131,7 @@ class Poller:
 				headers = {'Authorization' : 'Bearer ' + access_token,
 						'Content-Type': 'application/json'}
 				print user.name
-				#print headers
+				print headers
 				print json.dumps(params)
 				print "\n"
 				
