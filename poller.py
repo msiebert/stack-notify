@@ -9,6 +9,7 @@ from uuid import UUID
 GOOGLE_CLIENT_ID = '970444553690-o1rjhr7vqcj8ns8o9pkhdc8bvok6gooh.apps.googleusercontent.com'
 GOOGLE_SECRET = 'NW-ojO2ewOvndWxamSEhLcfw'
 GOOGLE_REFRESH_TOKEN = '1/wFxq47iHvo7eHjtFZMLdGnXlaJjtzM7KVGdXzhlhYrQ'
+GOOGLE_API_KEY = 'AIzaSyBwIvZ6UA-0Q5pLKmM6MWi4O2_txjvBhvw'
 
 class Tag:
 	'''
@@ -63,7 +64,7 @@ class Poller:
 		tags = self.get_tags()
 		# for tag in tags:
 		# 	self.process_tag(tag)
-		self.process_tag(tags[1])
+		self.process_tag(tags[10])
 
 	def get_tags(self):
 		'''
@@ -154,8 +155,10 @@ class Poller:
 				'refresh_token': GOOGLE_REFRESH_TOKEN,
 				'grant_type': 'refresh_token'
 			}
+			print params
 
 			response = requests.post('https://accounts.google.com/o/oauth2/token', data=params).json()
+			print response
 			access_token = response['access_token']
 			expires = response['expires_in']
 
