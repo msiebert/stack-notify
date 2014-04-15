@@ -1,5 +1,7 @@
 package stack_notify.controllers
 
+import java.io._
+import java.net._
 import play.api._
 import play.api.data._
 import play.api.data.Forms._
@@ -17,7 +19,7 @@ object TagController extends StackNotifyController {
 	private def updateTagUrl = "https://api.stackexchange.com/2.2/me/tags"
 	private def updateTagParams(accessToken: String) = Map(
 		"order" -> "desc",
-		"sort" ->  "popular",
+		"sort" ->	"popular",
 		"site" -> "stackoverflow",
 		"key" -> key,
 		"accessToken" -> accessToken
@@ -54,6 +56,10 @@ object TagController extends StackNotifyController {
 			TagModel.deleteTagsForUser(user.get.id)
 			val tags = List("scala", "openid")
 			//get the tags from SO
+			val result = get(updateTagUrl + "?" + updateTagParams(user.get.accessToken.get).map { case (name, value) =>
+				name + "=" + value
+			}.mkString("&"))
+			println(result)
 			Async {
 				WS.url(updateTagUrl).withQueryString(
 					updateTagParams(user.get.accessToken.get):_*
@@ -70,7 +76,6 @@ object TagController extends StackNotifyController {
 							success("message" -> "Tags updated.")
 						}
 						case _ => {
-							println(new String(response.body.getBytes, "US-ASCII"))
 							failure("Error accessing SO. Error code: " + response.status)
 						}
 					}
@@ -83,6 +88,25 @@ object TagController extends StackNotifyController {
 		else {
 			failure("User not found.")
 		}
+	}
+
+	/**
+	 * Get an HTML response from a remote source
+	 * @param url
+	 */
+	def get(urlToRead: String): String = {
+		var result = ""
+		val url = new URL(urlToRead)
+		val conn = url.openConnection().asInstanceOf[HttpURLConnection]
+		conn.setRequestMethod("GET")
+		val rd = new BufferedReader(new InputStreamReader(conn.getInputStream()))
+		var line = rd.readLine()
+		while (line != null) {
+			 result += line
+			 line = rd.readLine()
+		}
+		rd.close()
+		result
 	}
 
 }
